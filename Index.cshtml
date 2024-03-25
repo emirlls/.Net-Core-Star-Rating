@@ -1,0 +1,344 @@
+﻿@* @page
+@model Degerlendirme.Pages.Clients.IndexModel
+@{
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <title>Rating System</title>
+        <style>
+            .star {
+                font-size: 60px;
+                color: gray;
+                cursor: pointer;
+            }
+
+                .star:hover,
+                .star.active {
+                    color: gold;
+                }
+
+            #saveButton {
+                font-size: 30px;
+                margin-top: 10px;
+                padding: 5px 10px;
+                cursor: pointer;
+                font-family:Arial;
+                transform-style:flat;
+            }
+        </style>
+    </head>
+    <body>
+        
+        <div id="ratingContainer">
+
+            <span id="star1" class="star" onclick="rate(1)" onmouseover="highlightStars(1)" onmouseout="resetStars()">★</span>
+            <span id="star2" class="star" onclick="rate(2)" onmouseover="highlightStars(2)" onmouseout="resetStars()">★</span>
+            <span id="star3" class="star" onclick="rate(3)" onmouseover="highlightStars(3)" onmouseout="resetStars()">★</span>
+            <span id="star4" class="star" onclick="rate(4)" onmouseover="highlightStars(4)" onmouseout="resetStars()">★</span>
+            <span id="star5" class="star" onclick="rate(5)" onmouseover="highlightStars(5)" onmouseout="resetStars()">★</span>
+
+        </div>
+
+        
+
+        <button id="saveButton" onclick="saveRating()">Kaydet</button>
+
+        <div id="voteCount">Oy Sayısı: <span id="count">0</span></div>
+
+        <script>
+            let stars = document.getElementsByClassName("star");
+            var currentRating = 0;
+            var clickedStarId = "";
+
+            function rate(rating) {
+                var starId = "star" + rating;
+                currentRating = rating;
+                clickedStarId = starId;
+                highlightStars(rating);
+            }
+
+            function highlightStars(rating) {
+                for (var i = 1; i <= 5; i++) {
+                    var star = document.querySelector('.star:nth-child(' + i + ')');
+                    if (i <= rating) {
+                        star.classList.add('active');
+                    } else {
+                        star.classList.remove('active');
+                    }
+                }
+            }
+
+
+            function resetStars() {
+                highlightStars(currentRating);
+            }
+            
+
+            function saveRating() {
+                var voteCountElement = document.getElementById('count');
+                var currentCount = parseInt(voteCountElement.innerText);
+
+                if (currentRating === 0) {
+                    // Hiçbir yıldıza tıklanmadıysa uyarı ver
+                    alert('Lütfen bir yıldız seçin.');
+                    return;
+                }
+
+                voteCountElement.innerText = currentCount + 1;
+
+                // Rating'i yıldız sayısıyla değiştirdik, diğer veriler değişmeden kaldı
+                var data = {
+                    ClickedStarId: clickedStarId,
+                    VoteCount: 1 // Başlangıçta her seferinde 1 arttırabilirsiniz
+                };
+
+                // Sayfadaki yıldızları güncelleme fonksiyonunu çağır
+                updateStars(data);
+
+                console.log('Rating bilgileri güncellendi:', data);
+
+                // Veritabanına kaydetme işlemi için fetch kullanımı
+
+                var url = '/Controller/RatingController'
+                fetch(url, {
+                    method: 'POST',
+                    action:''
+                    headers: {
+                        'Content-Type': 'application/json;charset=UTF-8',
+                    },
+                    body: JSON.stringify(data),
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Rating kaydedilirken bir hata oluştu');
+                    }
+                        // Başarılı bir şekilde kaydedildi
+                    console.log('Rating başarıyla kaydedildi');
+                })
+                .catch(error => {
+                    // Hata durumunda
+                    console.error(error.message);
+                });
+            }
+
+
+            function updateStars(data) {
+                if (data && data.clickedStarId) {
+                    // Veritabanına kayıt yapılmadığı için sadece sayfa üzerindeki yıldızları güncelleme
+                    var star = document.getElementById(data.clickedStarId);
+                    if (star) {
+                        star.classList.add('active');
+                    } else {
+                        console.error('Belirtilen starId ile eşleşen bir HTML öğesi bulunamadı. clickedStarId:', data.clickedStarId);
+                    }
+                } else {
+                    console.error('clickedStarId bilgisi geçersiz. Data:', data);
+                }
+            }
+
+            
+
+        </script>
+
+    </body>
+    </html>
+
+} *@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+@page
+@model Degerlendirme.Pages.Clients.IndexModel
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Rating System</title>
+    <style>
+
+    .star {
+        font-size: 60px;
+        color: gray;
+        cursor: pointer;
+    }
+
+    .star:hover,
+    .star.active {
+        color: gold;
+    }
+
+    #saveButton {
+        font-size: 30px;
+        margin-top: 10px;
+        padding: 5px 10px;
+        cursor: pointer;
+        font-family: Arial;
+        transform-style: flat
+    }
+
+    </style>
+</head>
+<body>
+    <div id="ratingContainer">
+        <span id="star1" class="star" onclick="rate(1, 'star1')" onmouseover="highlightStars(1)" onmouseout="resetStars()">★</span>
+        <span id="star2" class="star" onclick="rate(2, 'star2')" onmouseover="highlightStars(2)" onmouseout="resetStars()">★</span>
+        <span id="star3" class="star" onclick="rate(3, 'star3')" onmouseover="highlightStars(3)" onmouseout="resetStars()">★</span>
+        <span id="star4" class="star" onclick="rate(4, 'star4')" onmouseover="highlightStars(4)" onmouseout="resetStars()">★</span>
+        <span id="star5" class="star" onclick="rate(5, 'star5')" onmouseover="highlightStars(5)" onmouseout="resetStars()">★</span>
+    </div>
+
+    <div id="voteCount">Oy Sayısı: <span id="count">0</span></div>
+
+    <button id="saveButton" onclick="saveRating()">Kaydet</button>
+
+    <script>
+        let stars = document.getElementsByClassName("star");
+        var currentRating = 0;
+        var clickedStarId = "";
+
+        function rate(rating) {
+            var starId = "star" + rating;
+            currentRating = rating;
+            clickedStarId = starId;
+            highlightStars(rating);
+        }
+
+        function highlightStars(rating) {
+            for (var i = 1; i <= 5; i++) {
+                var star = document.getElementById('star' + i);
+                if (i <= rating) {
+                    star.classList.add('active');
+                    } else {
+                        star.classList.remove('active');
+                    }
+                }
+            }
+
+        function resetStars() {
+            highlightStars(currentRating);
+        }
+
+
+        // function saveRating() {
+        //     var voteCountElement = document.getElementById('count');
+        //     var currentCount = parseInt(voteCountElement.innerText);
+
+        //     if (currentRating === 0) {
+        //         // Hiçbir yıldıza tıklanmadıysa uyarı ver
+        //         alert('Lütfen bir yıldız seçin.');
+        //         return;
+        //     }
+
+        //     voteCountElement.innerText = currentCount + 1;
+
+        //     // Rating'i yıldız sayısıyla değiştirdik, diğer veriler değişmeden kaldı
+        //     var data = {
+        //         ClickedStarId: clickedStarId,
+        //         VoteCount: 1 // Başlangıçta her seferinde 1 arttırabilirsiniz
+        //     };
+
+        //     // jQuery Ajax kullanımı
+        //     $.ajax({
+        //         url: '/Rating/SaveRating',
+        //         //url: '@Url.//Action("SaveRating", "Rating")',
+        //         //url: '@Url//.Action("SaveRating","RatingController")',
+        //         //url: '/Controller/RatingController/SaveRating', // Controller'ın yolunu kontrol edin
+
+        //         type: 'POST',
+        //         contentType: 'application/json;charset=UTF-8',
+        //         data: JSON.stringify(data),
+                
+        //     });
+        // }
+
+
+        function saveRating() {
+            var voteCountElement = document.getElementById('count');
+            var currentCount = parseInt(voteCountElement.innerText);
+
+            if (currentRating === 0) {
+                // Hiçbir yıldıza tıklanmadıysa uyarı ver
+                alert('Lütfen bir yıldız seçin.');
+                return;
+            }
+
+            voteCountElement.innerText = currentCount + 1;
+
+            var data = {
+                ClickedStarId: clickedStarId,
+                VoteCount: 1 
+                
+            };
+
+            // Sayfadaki yıldızları güncelleme fonksiyonunu çağır
+            updateStars(data);
+
+            console.log('Rating bilgileri güncellendi:', data);
+
+            // Veritabanına kaydetme işlemi için fetch kullanımı
+
+            var url = '/Rating/SaveRating'
+             //url= '@Url.//Action("SaveRating")';
+            fetch(url, {
+                method: 'POST',
+                //action: '',
+                headers: {
+                    'Content-Type': 'application/json;charset=UTF-8',
+                },
+                body: JSON.stringify(data),
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Rating kaydedilirken bir hata oluştu');
+                }
+                console.log('Rating başarıyla kaydedildi');
+                //window.close();
+                //window.location.href = '/Thanks/Thank'
+      
+            })
+            .catch(error => {
+                console.error(error.message);
+            });
+        }
+
+        function updateStars(data) {
+            if (data && data.ClickedStarId) {
+                var star = document.getElementById(data.ClickedStarId);
+                if (star) {
+                    star.classList.add('active');
+
+                } else {
+                    console.error('ClickedStarId bilgisi geçersiz.');
+                }
+            }
+        }
+    </script>
+                        
+</body>
+</html>
+    
+
+
+
+ 
